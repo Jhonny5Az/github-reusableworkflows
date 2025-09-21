@@ -1,0 +1,17 @@
+name: Main Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  call-reusable-workflow:
+    uses: ./.github/workflows/reusable-python-workflow.yml
+    with:
+      python-version: '3.10'
+      package-manager: 'pip'  # Change to 'poetry' if you are using Poetry
+      install-args: ''  # Add additional install args if needed

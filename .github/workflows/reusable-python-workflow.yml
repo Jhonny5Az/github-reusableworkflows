@@ -1,0 +1,45 @@
+name: Reusable Python Workflow
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+      package-manager:
+        required: true
+        type: string
+      install-args:
+        required: false
+        type: string
+        default: ""
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install dependencies
+        run: |
+          if [ "${{ inputs.package-manager }}" == "pip" ]; then
+            pip install -r requirements.txt ${{ inputs.install-args }}
+          elif [ "${{ inputs.package-manager }}" == "poetry" ]; then
+            curl -sSL https://install.python-poetry.org | python3 - --version 1.4.2
+            export PATH="$HOME/.local/bin:$PATH"
+            poetry install ${{ inputs.install-args }}
+          fi
+
+      - name: Run tests
+        run: |
+          if [ "${{ inputs.package-manager }}" == "pip" ]; then
+            pytest
+          elif [ "${{ inputs.package-manager }}" == "poetry" ]; then
+            poetry run pytest
+          fi
